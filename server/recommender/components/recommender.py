@@ -64,12 +64,25 @@ class Recommender:
         return pd.DataFrame(similar_movies_list, columns=['movie_id', 'similarity_coefficient'])
 
     def get_similar(self, movie_id_user, movie_list):
+        movie_id_user = int(movie_id_user)
         movie_request = movie_list.loc[movie_list['movie_id'] == movie_id_user].copy()
-        movie_list = movie_list[movie_list['movie_id'] != movie_id_user]
-        movie_request_genre = movie_request.iloc[0]['genre']
-        movie_list['similarity_coefficient'] = movie_list['genre'].apply(lambda x: jaccard_score(movie_request_genre, x))
+        
+        # Verificar se o filme solicitado está presente na lista
+        if movie_request.empty:
+            print(f"O filme com ID {movie_id_user} não está presente na lista.")
+            return pd.DataFrame(columns=['movie_id', 'similarity_coefficient'])
+
+        movie_list = movie_list[movie_list['movie_id'] != movie_id_user].copy()
+
+        # Obter os gêneros do filme solicitado
+        movie_request_genre = set(movie_request.iloc[0]['genre'])
+
+        # Calcular a similaridade com base na sobreposição de gêneros
+        movie_list.loc[:, 'similarity_coefficient'] = movie_list['genre'].apply(lambda x: len(movie_request_genre.intersection(x)) / len(movie_request_genre.union(x)))
 
         return movie_list[['movie_id', 'similarity_coefficient']]
+
+
 
     def get_final_recommendations(self, similar_movies):
         final_list = similar_movies.groupby('movie_id').agg({'similarity_coefficient': 'mean'}).reset_index()

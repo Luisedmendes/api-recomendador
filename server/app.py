@@ -15,7 +15,6 @@ def recommend(id_user):
 
 @app.route("/similar/<id_movie>", methods=['GET'])  # Fazendo requisição diretamente pelo link. Exemplo: 127.0.0.1:5000/<Id_Usuario>
 def similar(id_movie):
-    print(typeof(id_movie))
     r = Recommender(db_file)
     # Obtém a lista de filmes do banco de dados
     movie_list = r.get_movie_list()
@@ -25,7 +24,7 @@ def similar(id_movie):
     sim = r.get_similar(id_movie, movie_list)
     
     # Retorna um array vazio caso não existam recomendações para este filme
-    return sim 
+    return sim.to_dict(orient="records") if not sim.empty else []
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
