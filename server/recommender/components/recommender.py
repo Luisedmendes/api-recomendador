@@ -66,7 +66,6 @@ class Recommender:
     def get_similar(self, movie_id_user, movie_list):
         movie_request = movie_list.loc[movie_list['movie_id'] == movie_id_user].copy()
         movie_list = movie_list[movie_list['movie_id'] != movie_id_user]
-
         movie_request_genre = movie_request.iloc[0]['genre']
         movie_list['similarity_coefficient'] = movie_list['genre'].apply(lambda x: jaccard_score(movie_request_genre, x))
 
